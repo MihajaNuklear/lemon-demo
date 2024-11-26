@@ -22,6 +22,11 @@ async function fetchProducts() {
     return [];
   }
 }
+
+function removeHtmlTags(text: string): string {
+  return text.replace(/<.*?>/g, "");
+}
+
 interface Product {
   id: string;
   attributes: {
@@ -56,7 +61,9 @@ export default async function Home() {
           <h2 className="text-lg font-semibold mt-2">
             {product.attributes.name}
           </h2>
-          <p className="text-gray-600 mt-1">{product.attributes.description}</p>
+          <p className="text-gray-600 mt-1">
+            {removeHtmlTags(product.attributes.description)}
+          </p>
           <p className="text-gray-800 font-bold mt-2">
             Prix: {product.attributes.price_formatted}
           </p>
