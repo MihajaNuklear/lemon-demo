@@ -1,101 +1,75 @@
+import axios from "axios";
 import Image from "next/image";
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+const lsqyConfig = {
+  API_KEY:
+    "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI5NGQ1OWNlZi1kYmI4LTRlYTUtYjE3OC1kMjU0MGZjZDY5MTkiLCJqdGkiOiIxZmVjNTE3N2Q2NTAxM2M0OGVkZTlmYTYxYjk2NGEzYTViMGIzMWUwYWJmMDM4NDQzNDBmNTgyZGZkOGZlNTFlNGQzYzllYTljNDlhYjlmYyIsImlhdCI6MTczMjYyMTU4OS4wMzI0NTUsIm5iZiI6MTczMjYyMTU4OS4wMzI0NTgsImV4cCI6MjA0ODE1NDM4OC45ODg2NDUsInN1YiI6IjM4NTc4MzUiLCJzY29wZXMiOltdfQ.NfxVo17Jwn93wyFGvjoFs1tNcbqiMv7gmXWcsjTDgzXP6WqeYUIlujzJQXsvAsNMzdt71HTaIWvyO5YMjTB9NMP7AJ_mkgZRr7RQAv52k3lAkWPMqbY2rdyyrOkCjQb5n7Vf4jB4xm7zD5hvIfQu_ZLtZ4NCNY7Sey5FgulwNHjO3NTPwu8myaO-e7G1LFTIc3g1T-VBSY-dewmS4ePD8udPWKglu1TbIM3ze5yrCpIyBbjCfyrwEwxHg5FgQPNYHwmAMF-ZtZotmokdr6S23RezbIvImWs0WEPBSWCE_zLth1rOrXW1WYjxFng0jXhyxEgysYPZDOQhY9TKxcHQmwS4s_p7ExkQAR2OLyYJIiARSbPV3qWYIWb0W26Bx0bFrhFLZGe_JF52UfM8Z5sRWhmGuaUhKNOnanoRZIOJQAY4Fd9Bu2ktBgfF_JinTjFjmRfijEbJb_cEWSPQmaEDXMd5DjF85Dy7cKctZBd9kIeILk4grjaOcWkaBAa9Nkcf",
+  URL: "https://api.lemonsqueezy.com/v1",
+};
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+const headers = {
+  Accept: "application/vnd.api+json",
+  "Content-Type": "application/vnd.api+json",
+  Authorization: `Bearer ${lsqyConfig.API_KEY}`,
+};
+
+async function fetchProducts() {
+  try {
+    const response = await axios.get(`${lsqyConfig.URL}/products`, { headers });
+    return response.data.data;
+  } catch (error) {
+    console.error("Erreur lors de la récupération des produits :", error);
+    return [];
+  }
+}
+interface Product {
+  id: string;
+  attributes: {
+    name: string;
+    description: string;
+    price: number;
+    price_formatted: string;
+    buy_now_url: string;
+    thumb_url: string;
+  };
+}
+
+export default async function Home() {
+  const products = await fetchProducts();
+
+  return (
+    <div className="flex flex-wrap justify-center h-screen items-center">
+      {products.map((product: Product) => (
+        <div
+          key={product.id}
+          className="border border-gray-300 p-4 m-4 rounded-md w-72 shadow-md"
+        >
+          <div className="border  border-gray-300 rounded-md  ">
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+              src={product.attributes.thumb_url}
+              alt={product.attributes.name}
+              className="w-full h-auto rounded-md"
+              width={500}
+              height={500}
             />
-            Deploy now
-          </a>
+          </div>
+          <h2 className="text-lg font-semibold mt-2">
+            {product.attributes.name}
+          </h2>
+          <p className="text-gray-600 mt-1">{product.attributes.description}</p>
+          <p className="text-gray-800 font-bold mt-2">
+            Prix: {product.attributes.price_formatted}
+          </p>
           <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href={product.attributes.buy_now_url}
             target="_blank"
             rel="noopener noreferrer"
+            className="block mt-4 px-4 py-2 text-center bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
           >
-            Read our docs
+            Acheter maintenant
           </a>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      ))}
     </div>
   );
 }
